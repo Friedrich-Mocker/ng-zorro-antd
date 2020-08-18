@@ -19,7 +19,8 @@ import {
   SimpleChanges,
   TemplateRef,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  HostListener
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { slideMotion } from 'ng-zorro-antd/core/animation';
@@ -93,8 +94,7 @@ const NZ_CONFIG_COMPONENT_NAME = 'timePicker';
               [(ngModel)]="value"
               (ngModelChange)="setValue($event)"
               (closePanel)="close()"
-            >
-            </nz-time-picker-panel>
+            ></nz-time-picker-panel>
           </div>
         </div>
       </div>
@@ -160,6 +160,12 @@ export class NzTimePickerComponent implements ControlValueAccessor, OnInit, Afte
   @Input() @InputBoolean() nzDisabled = false;
   @Input() @InputBoolean() nzAutoFocus = false;
 
+  @HostListener('document:keydown.enter', ['$event']) onKeydownHandler() {
+    this.onFocus(false);
+    this.close();
+    this.blur();
+  }
+
   setValue(value: Date | null): void {
     this.value = value ? new Date(value) : null;
     if (this._onChange) {
@@ -202,6 +208,11 @@ export class NzTimePickerComponent implements ControlValueAccessor, OnInit, Afte
 
   onFocus(value: boolean): void {
     this.focused = value;
+    if (!value) {
+      if (this._onChange) {
+        this._onChange(this.value);
+      }
+    }
   }
 
   focus(): void {
